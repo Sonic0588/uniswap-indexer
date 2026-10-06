@@ -1,0 +1,43 @@
+services:
+  app:
+    build:
+      context: .
+      target: dev-builder
+    restart: always
+    volumes:
+      - ./app:/code/app
+    ports:
+      - "8000:8000"
+      - "5678:5678"
+    depends_on:
+      - migrate
+    env_file:
+      - .env
+    # command: uv run debugpy --listen 0.0.0.0:5678 -m uvicorn app.server:app --host 0.0.0.0 --port 8000 --use-colors --reload
+    command: uv run python -m app.main
+
+  db:
+    image: postgres:18
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=uniswap-indexer
+      - POSTGRES_PASSWORD=password
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    image: migrate/migrate
+    volumes:
+    - ./migrations:/migrations
+    depends_on:
+      db:
+        condition: service_healthy
+    command:
+    - -path=/migrations
+    - -database=postgres://postgres:password@db:5432/uniswap-indexer?sslmode=disable
+    - up

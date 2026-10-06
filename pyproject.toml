@@ -3,5 +3,37 @@ name = "uniswap-indexer"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
-dependencies = []
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "asyncpg>=0.31.0",
+    "python-dotenv>=1.2.4",
+    "web3>=8.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "debugpy>=1.8.22",
+    "mypy>=2.4.0",
+    "ruff>=0.16.10",
+]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["I", "F", "E", "W", "PL", "R", "RUF", "PT"]
+ignore = []
+fixable = ["ALL"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+lines-after-imports = 2
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+  "PLR2004",  # allow magic value, in test sometime ok
+  "PLR0913",  # allow too many arguments
+  "PLC0415",  # allow import on top lvl
+]
+"*/__init__.py" = ["F403", "F401"]  # allow import and unused for __init__.py, its ok
